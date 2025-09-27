@@ -1,7 +1,6 @@
-use magpie::othello::Stone;
-
-#[test]
-fn stone_flip_equality() {
-    let stone = Stone::Black;
+#[cfg(kani)]
+#[kani::proof]
+fn stone_flop_equality() {
+    let stone: magpie::othello::Stone = kani::any();
     assert_eq!(stone, stone.flip().flip());
 }

@@ -130,6 +130,22 @@ fn squares_bit_count(rand_bitboard: ShadowBitboard) {
     assert!(success);
 }
 
+#[cfg(kani)]
+#[kani::proof]
+fn bits_should_be_consistent() {
+    // Check that black and white stones do not overlap with each other or the
+    // empty set
+    let rand_bitboard = Bitboard::try_from(kani::any::<ShadowBitboard>()).unwrap();
+
+    let bit_at = |index: usize| rand_bitboard & (1 << index);
+    let success = rand_bitboard
+        .bits()
+        .enumerate()
+        .all(|(index, pos)| bit_at(63 - index) == pos);
+
+    assert!(success);
+}
+
 #[quickcheck]
 fn stones_bit_count(rand_bitboard: ShadowBitboard) {
     let rand_bitboard = Bitboard::from(rand_bitboard);

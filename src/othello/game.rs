@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 /// To interact with the game it is useful to understand the bitboards that
 /// the board uses. The [`Board`]-struct documents these.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Game {
     board: Board,
     next_player: Stone,
@@ -17,7 +17,7 @@ pub struct Game {
 }
 
 /// This enum represents all states the game can be in.
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum Status {
     /// Indicates that the game has concluded with the specified winner.
     Win(Stone),

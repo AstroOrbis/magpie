@@ -37,3 +37,29 @@ Curious to play? One example features a functional Othello game with a random AI
 Benchmarks are [described here](/benches)
 
 Simply run `cargo bench` to run all benchmarks.
+
+## Tests
+
+Run `cargo test -r` to run native/prop tests (or `cargo nextest r -r` if you use nextest).
+
+Overall, we do 3 kinds of testing; native, proptest, and Kani.
+Kani is somewhat like proptest - except it uses formal verification instead of random testing, letting it detect (given enough time) *every possible edge case*.
+Due to the nature of Kani, however, you need to do a few extra things to run those tests!
+
+Install it [here](https://model-checking.github.io/kani/install-guide.html) (hint: on NixOS, [this](https://github.com/AstroOrbis/nur) might be of use :wink:).
+
+<details>
+  <summary>The Kani command is pretty large, so click me to see it all!</summary>
+This command should:
+- Run all Kani tests throughout the entire crate & tests directory
+- Print code coverage information
+- Print a unit test for values that fail, so you can quickly reproduce the error 
+- Not print too much unnecessary output
+- Use default thread count
+```sh
+cargo kani --tests -Fserde --coverage -Zsource-coverage -Zconcrete-playback --output-format=terse -j
+```
+</details>
+
+Thankfully, since we're bitboard-based, it doesn't need to deal with proofs of Rust's internal array functions.
+Godspeed!

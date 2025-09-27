@@ -2,6 +2,7 @@ use magpie::othello::{Bitboard, Board, Game, OthelloError, Position, PositionErr
 use quickcheck::{Arbitrary, Gen};
 
 #[derive(Debug, Clone)]
+#[cfg_attr(kani, derive(kani::Arbitrary))]
 pub struct ShadowBitboard(u64);
 
 impl Arbitrary for ShadowBitboard {
@@ -17,6 +18,7 @@ impl From<ShadowBitboard> for Bitboard {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(kani, derive(kani::Arbitrary))]
 pub struct ShadowPosition(u64);
 
 impl Arbitrary for ShadowPosition {
@@ -64,6 +66,29 @@ impl Arbitrary for ShadowBoard {
     }
 }
 
+#[cfg(kani)]
+impl kani::Arbitrary for ShadowBoard {
+    fn any() -> Self {
+        // Generate a random bitboard
+        let bits = kani::any::<u64>();
+
+        let mut black_stones = 0;
+        let mut white_stones = 0;
+
+        // Iterate over all bits
+        for i in 0..63 {
+            // Extract the next bit
+            let next_bit = (bits >> i) & 1;
+            if kani::any::<bool>() {
+                black_stones |= next_bit << i;
+            } else {
+                white_stones |= next_bit << i;
+            }
+        }
+        ShadowBoard::try_from((black_stones, white_stones)).unwrap()
+    }
+}
+
 impl TryFrom<(u64, u64)> for ShadowBoard {
     type Error = OthelloError;
 
@@ -100,6 +125,28 @@ impl Arbitrary for ShadowGame {
         let board = ShadowBoard::arbitrary(g);
         let player_black = bool::arbitrary(g);
         let passed_last_turn = bool::arbitrary(g);
+
+        let board = Board::try_from(board).unwrap();
+        let next_player = if player_black {
+            Stone::Black
+        } else {
+            Stone::White
+        };
+
+        ShadowGame {
+            board,
+            next_player,
+            passed_last_turn,
+        }
+    }
+}
+
+#[cfg(kani)]
+impl kani::Arbitrary for ShadowGame {
+    fn any() -> Self {
+        let board = ShadowBoard::any();
+        let player_black = kani::any::<bool>();
+        let passed_last_turn = kani::any::<bool>();
 
         let board = Board::try_from(board).unwrap();
         let next_player = if player_black {

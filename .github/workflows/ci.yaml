@@ -26,6 +26,8 @@ jobs:
         run: |
           cargo test
           cargo test --features serde
+      - name: Kani
+        uses: model-checking/kani-github-action@v1
 
   fmt:
     name: fmt

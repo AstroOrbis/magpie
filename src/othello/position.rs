@@ -1,6 +1,6 @@
 use crate::othello::{
-    Bitboard,
     constants::{FILES, POSITIONS, POSITIONS_AS_NOTATION, RANKS},
+    Bitboard,
 };
 
 #[cfg(feature = "serde")]

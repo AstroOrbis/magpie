@@ -37,11 +37,12 @@ fn board_no_legal_moves() -> Board {
     (black_pos, white_pos).try_into().unwrap()
 }
 
-#[quickcheck]
-fn bits_should_be_consistent(board: ShadowBoard) {
+#[cfg(kani)]
+#[kani::proof]
+fn bits_should_be_consistent() {
     // Check that black and white stones do not overlap with each other or the
     // empty set
-    let board = Board::try_from(board).unwrap();
+    let board = Board::try_from(kani::any::<ShadowBoard>()).unwrap();
 
     let black = board.bits_for(Stone::Black);
     let white = board.bits_for(Stone::White);
@@ -51,10 +52,12 @@ fn bits_should_be_consistent(board: ShadowBoard) {
     assert!((black | white) & empty == 0);
 }
 
-#[quickcheck]
-fn stone_at_consistency(board: ShadowBoard) {
+#[cfg(kani)]
+#[kani::proof]
+fn stone_at_consistency() {
     // Check that stone_at returns the correct stones
-    let board = Board::try_from(board).unwrap();
+
+    let board = Board::try_from(kani::any::<ShadowBoard>()).unwrap();
 
     let black = board.bits_for(Stone::Black);
     let white = board.bits_for(Stone::White);

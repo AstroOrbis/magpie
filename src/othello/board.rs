@@ -1,10 +1,10 @@
 use crate::othello::{
-    Bitboard, Position, Stone,
     constants::{
         BLACK_START_POS, FILE_A, FILE_H, RANK_1, RANK_8, SHIFT_DIRS, SHIFT_MASKS, SHIFT_RAYS,
         WHITE_START_POS,
     },
     display::BoardDisplay,
+    Bitboard, Position, Stone,
 };
 
 #[cfg(feature = "serde")]
@@ -43,7 +43,7 @@ use serde::{Deserialize, Serialize};
 // This shadow type can be deserialized and nothing else. Thanks to some Serde
 // magic it is possible to reuse the TryFrom trait and get proper validation.
 #[cfg_attr(feature = "serde", serde(try_from = "ShadowBoard"))]
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct Board {
     black_stones: Bitboard,
     white_stones: Bitboard,
@@ -499,5 +499,9 @@ pub enum OthelloError {
 
 // https://www.chessprogramming.org/General_Setwise_Operations#Generalized%20Shift
 fn dir_shift(x: Bitboard, shift: i8) -> Bitboard {
-    if shift > 0 { x >> shift } else { x << -shift }
+    if shift > 0 {
+        x >> shift
+    } else {
+        x << -shift
+    }
 }
