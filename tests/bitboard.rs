@@ -1,23 +1,28 @@
 use magpie::othello::{Bitboard, Position};
-use quickcheck_macros::quickcheck;
 
 mod common;
 
 use common::{ShadowBitboard, ShadowPosition};
 
-#[quickcheck]
-fn bitboard_raw_matches(num: u64) {
+#[cfg(kani)]
+#[kani::proof]
+fn bitboard_raw_matches() {
+    let num: u64 = kani::any();
     assert_eq!(num, Bitboard::from(num).raw());
 }
 
-#[quickcheck]
-fn position_equals_bitboard(position: ShadowPosition) {
-    let position = Position::try_from(position).unwrap();
+#[cfg(kani)]
+#[kani::proof]
+fn position_equals_bitboard() {
+    let position: Position = kani::any();
     assert_eq!(position, Bitboard::from(position));
 }
 
-#[quickcheck]
-fn bitboard_handles_bitwise(num1: u64, num2: u64) {
+#[cfg(kani)]
+#[kani::proof]
+fn bitboard_handles_bitwise() {
+    let num1: u64 = kani::any();
+    let num2: u64 = kani::any();
     let board1 = Bitboard::from(num1);
     let board2 = Bitboard::from(num2);
 
@@ -118,23 +123,9 @@ fn full_bitboard_bits_equal_hot_bits() {
     assert_eq!(v1, v2);
 }
 
-#[quickcheck]
-fn squares_bit_count(rand_bitboard: ShadowBitboard) {
-    let rand_bitboard = Bitboard::from(rand_bitboard);
-    let bit_at = |index: usize| rand_bitboard & (1 << index);
-    let success = rand_bitboard
-        .bits()
-        .enumerate()
-        .all(|(index, pos)| bit_at(63 - index) == pos);
-
-    assert!(success);
-}
-
 #[cfg(kani)]
 #[kani::proof]
-fn bits_should_be_consistent() {
-    // Check that black and white stones do not overlap with each other or the
-    // empty set
+fn squares_bit_count() {
     let rand_bitboard = Bitboard::try_from(kani::any::<ShadowBitboard>()).unwrap();
 
     let bit_at = |index: usize| rand_bitboard & (1 << index);
@@ -146,9 +137,11 @@ fn bits_should_be_consistent() {
     assert!(success);
 }
 
-#[quickcheck]
-fn stones_bit_count(rand_bitboard: ShadowBitboard) {
-    let rand_bitboard = Bitboard::from(rand_bitboard);
+#[cfg(kani)]
+#[kani::proof]
+#[kani::unwind(128)]
+fn stones_bit_count() {
+    let rand_bitboard = Bitboard::try_from(kani::any::<ShadowBitboard>()).unwrap();
     let expected = rand_bitboard.count_set();
     let result = rand_bitboard.hot_bits().filter(|pos| *pos != 0).count();
 

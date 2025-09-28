@@ -187,7 +187,7 @@ impl Game {
     /// ```
     #[must_use]
     pub fn board(&self) -> Board {
-        self.board.clone()
+        self.board
     }
 
     /// Returns whether or not the previous player passed their turn.
@@ -297,7 +297,7 @@ impl Game {
     /// println!("{}", game.display());
     ///  ```
     #[must_use]
-    pub fn display(&self) -> BoardDisplay {
+    pub fn display(&self) -> BoardDisplay<'_> {
         self.board.display()
     }
 }

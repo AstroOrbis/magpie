@@ -1,10 +1,10 @@
 use crate::othello::{
+    Bitboard, Position, Stone,
     constants::{
         BLACK_START_POS, FILE_A, FILE_H, RANK_1, RANK_8, SHIFT_DIRS, SHIFT_MASKS, SHIFT_RAYS,
         WHITE_START_POS,
     },
     display::BoardDisplay,
-    Bitboard, Position, Stone,
 };
 
 #[cfg(feature = "serde")]
@@ -386,8 +386,23 @@ impl Board {
     /// println!("{}", board.display());
     ///  ```
     #[must_use]
-    pub fn display(&self) -> BoardDisplay {
+    pub fn display(&self) -> BoardDisplay<'_> {
         BoardDisplay::new(self)
+    }
+
+    /// Returns the count of stones for both players.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use magpie::othello::{Board, Stone};
+    ///
+    /// let board = Board::standard();
+    /// let (black_count, white_count) = board.count_stones();
+    /// assert_eq!(2, black_count);
+    /// assert_eq!(2, white_count);
+    /// ```
+    pub fn count_stones(&self) -> (u8, u8) {
+        (self.black_stones.count_set(), self.white_stones.count_set())
     }
 }
 
@@ -499,9 +514,30 @@ pub enum OthelloError {
 
 // https://www.chessprogramming.org/General_Setwise_Operations#Generalized%20Shift
 fn dir_shift(x: Bitboard, shift: i8) -> Bitboard {
-    if shift > 0 {
-        x >> shift
-    } else {
-        x << -shift
-    }
+    if shift > 0 { x >> shift } else { x << -shift }
+}
+
+#[cfg(feature = "serde")]
+#[test]
+fn serde_legal_deserialization() -> serde_json::Result<()> {
+    let board = Board::standard();
+    let json = serde_json::to_string_pretty(&board)?;
+    let board: Board = serde_json::from_str(&json)?;
+
+    assert_eq!(Board::standard(), board);
+
+    Ok(())
+}
+
+#[cfg(feature = "serde")]
+#[test]
+fn serde_illegal_deserialization() {
+    // These two numbers share a bit with value 1 in the same position
+    let json = r#"{
+        "black_stones": 123456789,
+        "white_stones": 1
+    }"#;
+
+    let board = serde_json::from_str::<Board>(json);
+    assert!(board.is_err(), "The deserialization should not succeed");
 }

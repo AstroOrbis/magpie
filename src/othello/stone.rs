@@ -27,3 +27,11 @@ impl Stone {
         }
     }
 }
+
+#[cfg(kani)]
+#[kani::proof]
+fn stone_flip_equality() {
+    let stone: Stone = kani::any();
+    assert_ne!(stone, stone.flip());
+    assert_eq!(stone, stone.flip().flip());
+}

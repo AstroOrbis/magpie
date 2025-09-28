@@ -1,6 +1,6 @@
 use crate::othello::{
-    constants::{FILES, POSITIONS, POSITIONS_AS_NOTATION, RANKS},
     Bitboard,
+    constants::{FILES, POSITIONS, POSITIONS_AS_NOTATION, RANKS},
 };
 
 #[cfg(feature = "serde")]
@@ -131,6 +131,27 @@ impl Position {
     #[must_use]
     pub fn to_notation(self) -> String {
         POSITIONS_AS_NOTATION[self.0.leading_zeros() as usize].to_string()
+    }
+
+    /// Calculates a position from its index on the board (0-63).
+    ///
+    /// Returns an error if the index is out of bounds.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use magpie::othello::Position;
+    ///
+    /// let index = 32;
+    /// let p = Position::from_index(index).unwrap();
+    /// assert_eq!(p.raw(), 1 << (63 - index));
+    /// ```
+    pub fn from_index(index: u8) -> Result<Self, PositionError> {
+        if index > 63 {
+            Err(PositionError::InvalidPosition)
+        } else {
+            Ok(Position::new_unchecked(1 << (63 - index)))
+        }
     }
 }
 
@@ -295,4 +316,15 @@ pub enum PositionError {
     NotOneHotBitboard,
     /// Indicates that the position could not be parsed.
     InvalidPosition,
+}
+
+#[cfg(kani)]
+impl kani::Arbitrary for Position {
+    fn any() -> Self {
+        let rank: u8 = kani::any();
+        let file: u8 = kani::any();
+        kani::assume(rank < 8 && file < 8);
+        let bitboard = RANKS[rank as usize] & FILES[file as usize];
+        Position::new_unchecked(bitboard)
+    }
 }

@@ -1,15 +1,8 @@
 use magpie::othello::{Bitboard, Board, Game, OthelloError, Position, PositionError, Stone};
-use quickcheck::{Arbitrary, Gen};
 
 #[derive(Debug, Clone)]
 #[cfg_attr(kani, derive(kani::Arbitrary))]
 pub struct ShadowBitboard(u64);
-
-impl Arbitrary for ShadowBitboard {
-    fn arbitrary(g: &mut Gen) -> Self {
-        ShadowBitboard(u64::arbitrary(g))
-    }
-}
 
 impl From<ShadowBitboard> for Bitboard {
     fn from(bitboard: ShadowBitboard) -> Self {
@@ -20,13 +13,6 @@ impl From<ShadowBitboard> for Bitboard {
 #[derive(Debug, Clone)]
 #[cfg_attr(kani, derive(kani::Arbitrary))]
 pub struct ShadowPosition(u64);
-
-impl Arbitrary for ShadowPosition {
-    fn arbitrary(g: &mut Gen) -> Self {
-        let bit = (u8::arbitrary(g) % 63) + 1;
-        ShadowPosition(1 << bit)
-    }
-}
 
 impl TryFrom<ShadowPosition> for Position {
     type Error = PositionError;
@@ -40,30 +26,6 @@ impl TryFrom<ShadowPosition> for Position {
 pub struct ShadowBoard {
     black_stones: u64,
     white_stones: u64,
-}
-
-impl Arbitrary for ShadowBoard {
-    fn arbitrary(g: &mut Gen) -> Self {
-        // Generate a random bitboard
-        let bits = u64::arbitrary(g);
-
-        let mut black_stones = 0;
-        let mut white_stones = 0;
-
-        // Iterate over all bits
-        for i in 0..63 {
-            // Extract the next bit
-            let next_bit = (bits >> i) & 1;
-            // Arbitrarily assign this bit to either black or white
-            let assign_black = bool::arbitrary(g);
-            if assign_black {
-                black_stones |= next_bit << i;
-            } else {
-                white_stones |= next_bit << i;
-            }
-        }
-        ShadowBoard::try_from((black_stones, white_stones)).unwrap()
-    }
 }
 
 #[cfg(kani)]
@@ -118,27 +80,6 @@ pub struct ShadowGame {
     board: Board,
     next_player: Stone,
     passed_last_turn: bool,
-}
-
-impl Arbitrary for ShadowGame {
-    fn arbitrary(g: &mut Gen) -> Self {
-        let board = ShadowBoard::arbitrary(g);
-        let player_black = bool::arbitrary(g);
-        let passed_last_turn = bool::arbitrary(g);
-
-        let board = Board::try_from(board).unwrap();
-        let next_player = if player_black {
-            Stone::Black
-        } else {
-            Stone::White
-        };
-
-        ShadowGame {
-            board,
-            next_player,
-            passed_last_turn,
-        }
-    }
 }
 
 #[cfg(kani)]
