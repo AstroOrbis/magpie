@@ -404,6 +404,27 @@ impl Board {
     pub fn count_stones(&self) -> (u8, u8) {
         (self.black_stones.count_set(), self.white_stones.count_set())
     }
+
+    pub fn cw(&self) -> Self {
+        Self {
+            black_stones: self.black_stones.cw(),
+            white_stones: self.white_stones.cw(),
+        }
+    }
+
+    pub fn ccw(&self) -> Self {
+        Self {
+            black_stones: self.black_stones.ccw(),
+            white_stones: self.white_stones.ccw(),
+        }
+    }
+
+    pub fn flip180(&self) -> Self {
+        Self {
+            black_stones: self.black_stones.flip180(),
+            white_stones: self.white_stones.flip180(),
+        }
+    }
 }
 
 #[cfg_attr(feature = "serde", derive(Deserialize))]
