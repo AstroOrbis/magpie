@@ -153,6 +153,16 @@ impl Position {
             Ok(Position::new_unchecked(1 << (63 - index)))
         }
     }
+
+    pub fn rotate_cw(self) -> Self {
+        Self(Bitboard::from(self.0).cw().0)
+    }
+    pub fn rotate_ccw(self) -> Self {
+        Self(Bitboard::from(self.0).ccw().0)
+    }
+    pub fn flip180(self) -> Self {
+        Self(Bitboard::from(self.0).flip180().0)
+    }
 }
 
 impl From<Position> for Bitboard {
