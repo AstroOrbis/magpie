@@ -425,6 +425,11 @@ impl Board {
             white_stones: self.white_stones.flip180(),
         }
     }
+
+    /// Concats both u64 bitboards into a single u128. Black comes first, then white.
+    pub fn concat(&self) -> u128 {
+        (self.black_stones.raw() as u128) << 64 | (self.white_stones.raw() as u128)
+    }
 }
 
 #[cfg_attr(feature = "serde", derive(Deserialize))]
